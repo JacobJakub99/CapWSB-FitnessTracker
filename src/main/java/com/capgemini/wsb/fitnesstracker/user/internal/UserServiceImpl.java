@@ -6,6 +6,8 @@ import com.capgemini.wsb.fitnesstracker.user.api.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import java.time.LocalDate;
+import java.util.ArrayList;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,6 +28,41 @@ class UserServiceImpl implements UserService, UserProvider {
         return userRepository.save(user);
     }
 
+    @Override
+    public Optional<User> deleteUser(long id) {
+        return userRepository.findById(id).map(user ->
+        {
+            userRepository.deleteById(id);
+            return user;
+        });
+    }
+
+    @Override
+    public List<User> findByEmailContaining(String query) {
+        return userRepository.findByEmailContainingIgnoreCase(query);
+    }
+
+    @Override
+    public List<User> getUsersOlderThanProvided(final LocalDate time) {
+        final List<User> olderUsers = new ArrayList<>();
+        final List<User> allUsers = userRepository.findAll();
+        if(!allUsers.isEmpty()) {
+            allUsers.forEach(user -> {
+                if(user.getBirthdate().isBefore(time)) {
+                    olderUsers.add(user);
+                }
+            });
+        }
+        return olderUsers;
+    }
+
+    @Override
+    public Optional<User> updateUserEmail(long id, String newEmail) {
+        return userRepository.findById(id).map(user -> {
+            user.setEmail(newEmail);
+            return user;
+        }).map(userRepository::save);
+    }
     @Override
     public Optional<User> getUser(final Long userId) {
         return userRepository.findById(userId);
