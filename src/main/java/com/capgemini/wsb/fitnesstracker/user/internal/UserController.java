@@ -8,7 +8,7 @@ import java.time.LocalDate;
 
 import java.util.List;
 import static java.util.stream.Collectors.toList;
-import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.ResponseEntity.ok;
 
 @RestController
@@ -38,14 +38,21 @@ class UserController {
         return userService.findAllUsers().stream().map(userIDMapper::toDto).toList();
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<UserDto> deleteUser(@RequestParam long id){
-        return userService.deleteUser(id).map(userMapper::toDto).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+    @DeleteMapping("/{userId}")
+    @ResponseStatus(NO_CONTENT)
+    public ResponseEntity<Long> deleteUser(@PathVariable("userId") Long userId){
+        userService.deleteUser(userId);
+        return new ResponseEntity<>(userId, NO_CONTENT);
     }
 
-    @GetMapping("/emailInfo")
-    public List<UserMailIDDto> getAllUsersByEmailContaining(@RequestParam String query){
-        return userService.findByEmailContaining(query).stream().map(userMailIDMapper::toDto).toList();
+    @GetMapping("/{id}")
+    public UserDto getUserById(@PathVariable("id") Long id){
+        return userService.getUser(id).map(userMapper::toDto).get();
+    }
+
+    @GetMapping("/email")
+    public List<UserMailIDDto> getAllUsersByEmailContaining(@RequestParam("email") String email){
+        return userService.findByEmailContaining(email).stream().map(userMailIDMapper::toDto).toList();
     }
 
     @GetMapping("/older/{time}")
@@ -57,8 +64,9 @@ class UserController {
         return ok(olderUsers.stream().map(userMapper::toDto).collect(toList()));
     }
 
-    @PutMapping("/updateUserEmail")
-    public ResponseEntity<User> updateUserEmail(@RequestBody UserMailIDDto userMailIDDto){
-        return userService.updateUserEmail(userMailIDDto.ID(), userMailIDDto.email()).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+    @PutMapping("/{userId}")
+    public ResponseEntity<User> updateUser(@PathVariable Long userId, @RequestBody UserDto changedUser) {
+        return new ResponseEntity<>(userService.updateUser(userId, userMapper.toEntitySave(changedUser)), ACCEPTED);
     }
+
 }

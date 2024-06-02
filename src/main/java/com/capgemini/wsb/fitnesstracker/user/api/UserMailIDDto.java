@@ -1,3 +1,3 @@
 package com.capgemini.wsb.fitnesstracker.user.api;
 
-public record UserMailIDDto (long ID, String email){}
+public record UserMailIDDto (long id, String email){}

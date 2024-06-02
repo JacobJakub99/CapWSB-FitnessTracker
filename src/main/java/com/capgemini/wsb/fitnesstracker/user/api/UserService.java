@@ -14,5 +14,5 @@ public interface UserService {
     Optional<User> deleteUser(long ID);
     List<User> findByEmailContaining(String query);
     public List<User> getUsersOlderThanProvided(final LocalDate time);
-    Optional<User> updateUserEmail(long id, String newEmail);
+    User updateUser(Long userID, User user);
 }
